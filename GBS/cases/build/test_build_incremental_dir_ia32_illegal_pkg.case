@@ -1,0 +1,36 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:test incremental with spec having no source tag
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> sudo rm ~/GBS-ROOT/local/repos -rf
+
+> rm build -rf
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/xorg-x11-filesystem.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --incremental -A ia32 2>&1 | tee log
+
+> test -z "`grep "mount:.*scratch" log`"
+
+> test -n "`grep "rpmbuild.*-bs" log`"
+
+#check source package whether changed or not
+> cd xorg-x11-filesystem && test -n "`git status | grep "working directory clean"`"
+
+> test -n "`find ~/GBS-ROOT/local/repos -name "*xorg-x11-filesystem*rpm"`"
+
+> find ~/GBS-ROOT/local/repos/ -name "*.rpm" | xargs -i rpm -qpR {} | grep "rpmlib(ShortCircuited)"

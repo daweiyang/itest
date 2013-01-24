@@ -1,0 +1,23 @@
+__Issue__: 13, 69
+
+__Summary__: export when packaging/specfile dosen't exist
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizen.cfg
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake
+
+> rm packaging/fake.spec
+
+> git commit -a -m 'rm spec'
+
+> (! gbs -c ../conf_fixtures/tizen.cfg ex 2>&1 | tee ../log)
+
+> grep 'can.t find any spec file' ../log

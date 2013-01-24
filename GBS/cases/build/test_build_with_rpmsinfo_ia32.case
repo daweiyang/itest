@@ -1,0 +1,29 @@
+__Issue__: 32
+
+__Tag__:
+
+__Summary__: gbs build with info about rpms location
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> . ./tools/assert
+
+> sudo rm $GBS_LOCAL_REPOS -rf
+
+> ./tools/create_proj ./specs/fake.spec
+
+> gbs -c ./conf_fixtures/tizendev.cfg build -A ia32 2>&1| tee log
+
+> grep "^[ |\t].*$GBS_RPMS_I686$" log
+
+> grep "^[ |\t].*$GBS_SRPMS_I686$" log
+
+> AssertCleanWith fake
+
+> AssertRPMsIWith fake

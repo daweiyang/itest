@@ -1,0 +1,27 @@
+__Issue__: 100
+
+__Tag__:
+
+__Summary__: gbs build with user and passwd in repo, but not in build log
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> . ./tools/assert
+
+> sudo rm $GBS_LOCAL_REPOS -rf
+
+> ./tools/create_proj ./specs/fake.spec
+
+> gbs build -R https://junchunx:me,bj,2012@download.tz.otcshare.org/snapshots/trunk/common/latest --skip-conf-repos  -A ia32 2>&1| tee log
+
+> (! grep "init_buildsystem.*me,bj,2012" log)
+
+> AssertCleanWith fake
+
+> AssertRPMsIWith fake

@@ -1,0 +1,25 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:test remotebuild --profile negative
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> if [ -d ./remotebuild ];then rm remotebuild -rf; fi
+
+> mkdir remotebuild
+
+> cd remotebuild
+
+> ../tools/create_proj ../specs/fake.spec
+
+> (! gbs -c ../conf_fixtures/multiple_profile.cfg remotebuild -P ERROR fake 2>&1|tee log)
+
+> grep -E -i "error.*no such section:.*" log

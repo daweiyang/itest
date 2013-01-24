@@ -1,0 +1,27 @@
+__Issue__: 340
+
+__Tag__:
+
+__Summary__: gbs should print auth error info when username or passwd is wrong
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/invalid_build_server_1.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/fake.spec
+
+> gbs -c ../conf_fixtures/invalid_build_server_1.cfg build fake -A ia32 2>&1 | tee log
+
+> grep -E -i "error.*authenticate failed on" log

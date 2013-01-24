@@ -1,0 +1,55 @@
+__Issue__: 82
+
+__Tag__:
+
+__Summary__: test submit -r with -c option
+
+__Precondition__
+
+1. Tested Pkgs: test-submit
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> if [ -d 'fake-submit' ]; then rm -rf fake-submit; fi
+
+> if [ -d 'test-submit' ]; then rm -rf test-submit; fi
+
+> if [ -d 'fake-remote' ]; then rm -rf fake-remote; fi
+
+> tools/create_proj specs/fake.spec -C fake-submit
+
+> date >>fake-submit/README
+
+> git --git-dir=fake-submit/.git/ commit -am "Change README for test"
+
+> git clone fake-submit test-submit
+
+> git clone fake-submit fake-remote
+
+> pushd test-submit
+
+> git remote add fake-origin ../fake-remote
+
+> git remote -v
+
+> gbs submit --remote fake-origin --commit HEAD~1 -m "test remote" |tee log
+
+> TAG=`awk -v FS=: '/submit\/trunk/ {print $3}' log`
+
+> test -n $TAG
+
+# with git version 1.7.11.4, checking is simple
+# test -n "`git --git-dir=fake-remote/.git/ tag -l --points-at HEAD~1`"
+
+> TAG=`awk -v FS=: '/submit\/trunk/ {print $3}' log`
+
+> pushd
+
+> c1=`git --git-dir=fake-remote/.git/ log $TAG -1 --pretty=format:%H`
+
+> c2=`git --git-dir=test-submit/.git/ rev-parse HEAD~1`
+
+> [ ${c1} == ${c2} ] && echo "GBS_TEST_PASSED"
+

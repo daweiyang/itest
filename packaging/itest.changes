@@ -1,0 +1,120 @@
+* Mon Nov 05 2012 Guan Junchun <junchunx.guan@intel.com> - 1.0
+- bump to version 1.0
+- refine a remotebuild case
+- modify import and conf cases
+- update import cases because of pristine-tar
+- fix press Ctrl+C twice bug
+- fix the color dispaly bug of failed cases
+- Add pristine-tar support case
+- Rename modules
+- add and update build cases
+- Add a case to test building cyclic dependency issue
+- Support create dummy project from several spec files
+- Update Install and Upgrade test cases
+- if press ctrl+c in running, it can give a report too
+- Fix spec in test-packages.tar.gz
+- Revert "Shuffle cases before testing rather than sort them"
+- fix remotebuild test cases synatax error
+- modify import cases
+- fix submit cases syntax error found by CaseParser
+- fix two gbs remotebuild cases:
+- add three import negative test cases
+- Add a script to create dummy project for testing
+- remove the old itest data before install itest
+- Get sudo password from env variable GBS_SUDO_PASSWORD
+- Support case interactive input by section __QA__
+- Add CaseParser to parse case text
+- update remotebuild cases and test-packages
+- Revert "update remotebuild cases and update test packages"
+- update remotebuild cases and update test packages
+- Print log to stdout if -vv
+- do not use /var/tmp/.gbs.log as tmp log file
+- Refine export cases
+- update test cases
+- Squeeze tset-packages.tar.gz
+- Squeeze IMPORT dir in test-packages.tar.gz
+- Shuffle cases before testing rather than sort them
+- Fix cases sort issue
+- Modify check method of import cases
+- Revert "Modify check method of import cases"
+- Modify check method of import cases
+- Send test report and logs to server
+- Add two manuall cases: install / upgrade
+- refine --spec case in remotebuild
+- Split TestReport class into TextReport and HTMLReport
+- Move utils.env_set to TestSuite class
+- Check exit code of steps to set testing pass.
+- Refactor abort_with_ctrl_c()
+- Add two export cases and one import case
+- update build case
+- Refactor code deal with ctrl c
+- delete 2 invalid cases
+- update conf cases
+- update and add build cases
+- Fix get_local_ipv4() for Fedora 17
+- Remove explicit use of sys.argv
+- update build case
+- return the log's path instead of log content of failed case
+- refine time_cost display
+- chang echo GBS_TEST_PASSED to a line
+- update and add new cases
+- Change itest directory hierarchy
+- Use ifconfig to get local ip address
+- Add message to show log dir and report file
+- when press CTRL+C, choose to continue next case or abort
+- delete needless time variables
+- fix bugs
+- Fix some pylint issues
+- Change style of import lines
+- Calcuate time cost in GbsTest.run()
+- delete proxy set function
+- Format README in consist indent
+- refine docs of classes and functions
+- add gbs vim plugin
+- add README
+- update build repo
+- add specfile
+- code cleanup
+- add cases to test build, remotebuild profile option
+- add setup.py
+- fix bugs
+- add multiple profiles conf and localrepo conf
+- Module separation
+- new way to find cases
+- show more friendly test results
+- update test cases
+- modify submit test cases
+- update build cases
+- update build testcases
+- delete all cat commands in remotebuild cases
+- Revert "version 0.1.1 is more general than enter key"
+- update remotebuild and submit test cases
+- modify export and import cases
+- update test-packages
+- Merge "add remotebuild and submit cases"
+- add build cases
+- support running multiple test suits and cases for gbstest
+- update changelog cases
+- add remotebuild and submit cases
+- fix debug info bug
+- add import and export cases
+- add conf test cases
+- add chroot test cases
+- add changelog test cases
+- when gbs import, send enter defaultly
+- support bash tab completion for gbs
+- add html.py
+- new report function
+- add gbstest script
+- update fake package
+- Add test packages
+- add config fixtures
+- Initial itest project
+- update build case and conf file
+- in some os /tmp/ is not exist
+- move workspace to /tmp/
+- change gbs result to pass or fail
+- version 0.1.1 is more general than enter key
+- print debug info, when executing
+- fix quote bug
+

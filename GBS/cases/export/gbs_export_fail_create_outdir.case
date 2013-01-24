@@ -1,0 +1,20 @@
+__Summary__: create outdir fail (but parent dir no permission)
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizen.cfg
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake
+
+> (! gbs ex -o /root/out 2>&1 | tee ../log)
+
+> grep -i "failed to create.*Permission denied" ../log
+
+#/root no permission, so create out dir denied
+> [ ! -d /root/out ]

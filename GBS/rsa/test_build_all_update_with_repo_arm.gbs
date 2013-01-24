@@ -1,0 +1,45 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> ARCH="armv7l"
+
+> PKGSPATH="$HOME/test-pkgs"
+
+> LOGDIR="$PWD/logs/$ARCH" &&  mkdir -p $LOGDIR
+
+> if [ -z "`grep "Host rsg" ~/.ssh/config`" ];then cat ../conf_fixtures/ssh.cfg >> ~/.ssh/config; fi
+
+> if [ ! -e ~/bin/repo ]; then mkdir -p ~/bin; curl https://dl-ssl.google.com/dl/googlesource/git-repo/repo > ~/bin/repo; chmod a+x ~/bin/repo; fi
+
+> if [ -d "$PKGSPATH" ]; then ~/bin/repo sync; else mkdir $PKGSPATH; cd $PKGSPATH; ~/bin/repo init -u git://tools-repo/all-manifest.git -b tz --repo-url=git://tools-repo/git-repo.git; fi
+
+> PKGS="`find $PKGSPATH -type d -name '.git' -print0 | xargs -0 -i dirname {}`"
+
+> for pkg in $PKGS; do LOGNAME=`echo $pkg | sed -e "s|$PKGSPATH||g" -e "s|/|$|g"`.log; gbs -d -c conf_fixtures/tizendev.cfg build $pkg --over -A $ARCH | tee $LOGDIR/$LOGNAME; done
+
+> cd $LOGDIR
+
+> FAIL_REASON=("arch not compatible" "failed.*missing build dependencies" "error.*no spec files to build" "error.*No source package" "failed.*export source files" "failed.*due to rpmbuild issue")
+
+> cnt=${#FAIL_REASON[@]}
+
+> for (( i = 0; i < cnt; i++)); do grep "${FAIL_REASON[$i]}" $LOGDIR -rol --include="*.log" | sed -e "s|$LOGDIR/||g" -e "s|.log||" -e "s|\([$]\)|/|g" | tee fail_$i; done
+
+> grep '[Ii]nfo.*[D|d]one' $LOGDIR -rol --include='*.log' | sed -e "s|$LOGDIR/||g" -e "s|.log||" -e "s|\([$]\)|/|g" | xargs -n1 | tee done; grep -vf fail_0 done | tee pass
+
+> find $LOGDIR -name "*.log" | sed -e "s|$LOGDIR/||g" -e "s|.log||" -e "s|\([$]\)|/|g" | tee all
+
+> cat fail* > fail; cat fail pass > kown; grep -vf kown all | tee unkown
+
+> awk '{if (FILENAME == "fail_0") str="Failed with arch(source code issue)"; else if (FILENAME == "fail_1") str="Failed with expansion error"; else if (FILENAME == "fail_2") str="Failed with specfile parse issue"; else if (FILENAME == "fail_3") str="Failed with no packaging dir or spec"; else if (FILENAME == "fail_4") str="Failed with export source files"; else if (FILENAME == "fail_5") str="Failed with tarball issue"; else if (FILENAME == "unkown") str="Failed Unexpectly"; else str="PASS"; printf("%s, %s\n", $0, str)}' fail_* unkown pass >> sys-report.csv

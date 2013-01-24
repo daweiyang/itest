@@ -1,0 +1,33 @@
+__Issue__: 467
+
+__Tag__:
+
+__Summary__: check whether it can pass if proxy trailing with '/'
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build
+
+> ../tools/create_proj ../specs/fake.spec
+
+> export http_proxy=$http_proxy/
+
+> export https_proxy=$https_proxy/
+
+> export no_proxy=$no_proxy/
+
+> gbs -c ../conf_fixtures/tizendev.cfg build -A ia32 2>&1 | tee log
+
+> grep "finished building fake" log

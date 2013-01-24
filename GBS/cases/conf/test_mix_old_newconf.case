@@ -1,0 +1,24 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: test if new config can work when there's old config in $HOME
+
+__Precondition__
+
+1. Tested Pkgs:fake
+2. Tested Repo:
+3. Tested Conf:~/oldconf fake/newconf
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cp -f conf_fixtures/oldconf/base.cfg ~/.gbs.conf
+
+> cp conf_fixtures/base.cfg fake/.gbs.conf
+
+> cd fake
+
+> gbs lb -A i586 --overwrite --clean
+

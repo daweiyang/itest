@@ -1,0 +1,66 @@
+#! /bin/bash
+
+. ./tools/gbs_vars
+#we'll use gbs_vars
+#GBS_ROOT_IA32 GBS_ROOT_ARMV7L GBS_RPMS_DIR GBS_SRPMS_DIR
+#in this file
+
+#assert git packages under current dir are clean
+function AssertClean()
+{
+    find . -maxdepth 1 -type d| sed "1d"| xargs -i sh -c "cd {};git status| grep 'working directory clean'"
+}
+#assert git package clean
+# such as: AssertCleanWith fake sw-tools
+function AssertCleanWith()
+{
+    echo $*| xargs -n1| xargs -i sh -c "cd {} && git status| grep 'working directory clean'"
+}
+
+function AssertRPMsI()
+{
+    find . -maxdepth 1 -type d| sed -e "1d" -e "s|./||g"| xargs -i sh -c "ls ${GBS_RPMS_I686}| grep {}" && \
+    find . -maxdepth 1 -type d| sed -e "1d" -e "s|./||g"| xargs -i sh -c "ls ${GBS_SRPMS_I686}| grep {}"
+}
+
+function AssertRPMsIWith()
+{
+    echo $*|xargs -n1| xargs -I{} sh -c "ls ${GBS_RPMS_I686}| grep {}" && \
+    echo $*|xargs -n1| xargs -I{} sh -c "ls ${GBS_SRPMS_I686}| grep {}"
+}
+
+function AssertRPMsIWithout()
+{
+    ! AssertRPMsIWith $*
+}
+
+function AssertRPMsA()
+{
+    find . -maxdepth 1 -type d|sed -e "1d" -e "s|./||g"|xargs -i sh -c "ls ${GBS_RPMS_ARMV7L}| grep {}" && \
+    find . -maxdepth 1 -type d|sed -e "1d" -e "s|./||g"|xargs -i sh -c "ls ${GBS_SRPMS_ARMV7L}| grep {}"
+}
+
+function AssertRPMsAWith()
+{
+    echo $*|xargs -n1| xargs -I{} sh -c "ls ${GBS_RPMS_ARMV7L}| grep {}" && \
+    echo $*|xargs -n1| xargs -I{} sh -c "ls ${GBS_SRPMS_ARMV7L}| grep {}"
+}
+
+function AssertRPMsAWithout()
+{
+    ! AssertRPMsAWith $*
+}
+#Assert build root scratch.i686.0 with rpm xxx installed
+#later we can AssertRootI1With AssertRootI2With AssertRootI3With...
+function AssertRootI0With()
+{
+    echo $*| xargs -n1| xargs -I{} sh -c "sudo chroot $GBS_ROOT_I686_0 rpm -q {}"
+}
+#Assert build root scratch.armv7l.0 with rpm xxx installed
+#later we can AssertRootA1With AssertRootA2With AssertRootA3With...
+function AssertRootA0With()
+{
+    echo $*| xargs -n1| xargs -I{} sh -c "sudo chroot $GBS_ROOT_ARMV7L_0 rpm -q {}"
+}
+
+

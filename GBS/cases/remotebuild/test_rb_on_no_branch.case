@@ -1,0 +1,31 @@
+__Issue__: 85
+
+__Tag__:
+
+__Summary__: run gbs on no branch
+
+__Precondition__
+
+1. Tested Pkgs: nobranch
+2. Tested Repo:
+3. Tested Conf: normal_rb.cfg
+
+__Steps__
+
+> source tools/gbs_vars
+
+> if [ -d ./remotebuild ];then rm remotebuild -rf; fi
+
+> mkdir remotebuild
+
+> cd remotebuild
+
+> ../tools/create_proj ../specs/fake.spec
+
+> cd fake
+
+> git checkout --detach
+
+> gbs -c ../../conf_fixtures/normal_rb.cfg remotebuild -T $GBS_RB_TARGET
+
+> osc -c ../../conf_fixtures/oscrc rdelete --recursive $GBS_RB_TARGET -m "a"

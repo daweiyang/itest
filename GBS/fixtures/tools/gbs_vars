@@ -1,0 +1,10 @@
+#! /bin/bash
+
+GBS_ROOT_I686_0=~/GBS-ROOT/local/scratch.i586.0
+GBS_ROOT_ARMV7L_0=~/GBS-ROOT/local/scratch.armv7l.0
+GBS_RPMS_I686=~/GBS-ROOT/local/repos/tizen/i586/RPMS
+GBS_SRPMS_I686=~/GBS-ROOT/local/repos/tizen/i586/SRPMS
+GBS_RPMS_ARMV7L=~/GBS-ROOT/local/repos/tizen/armv7l/RPMS
+GBS_SRPMS_ARMV7L=~/GBS-ROOT/local/repos/tizen/armv7l/SRPMS
+GBS_LOCAL_REPOS=~/GBS-ROOT/local/repos
+GBS_RB_TARGET=home:xiaoqiang:gbs:itest-`date +%Y%m%d%H%M%S`-$RANDOM

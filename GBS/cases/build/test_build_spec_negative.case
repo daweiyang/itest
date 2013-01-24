@@ -1,0 +1,31 @@
+__Issue__: 485, 69
+
+__Tag__:
+
+__Summary__:test spec feature with wrong param
+
+__Precondition__
+
+1. Tested Pkgs: fake
+2. Tested Repo: https://download.tizendev.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/fake.spec
+
+> (! gbs -c ../conf_fixtures/tizendev.cfg build --spec=fake/packaging/fake.spec fake -A ia32 2>&1 | tee log)
+
+#check build log key word
+> test -n "`grep "gbs build.*error.*argument --spec" log`"
+
+#check source package whether changed or not
+> cd fake && test -n "`git status | grep "working directory clean"`"

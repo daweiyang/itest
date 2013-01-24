@@ -1,0 +1,39 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: test incremental feature
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> sudo rm ~/GBS-ROOT/local/repos -rf
+
+> rm build -rf
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/sw-tools.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --incremental -A armv7l sw-tools 2>&1 | tee log
+
+#check build log key word
+> test -z "`grep "mount:.*scratch" log`"
+
+> test -n "`grep "rpmbuild.*-bs" log`"
+
+#check source package whether changed or not
+> cd sw-tools && test -n "`git status | grep "working directory clean"`"
+
+#check rpm generated whether or not
+> test -n "`find ~/GBS-ROOT/local/repos/ -name "*sw-tools*rpm"`"
+
+#check generated rpm whether is rpmlib(ShortCircuited) or not
+> find ~/GBS-ROOT/local/repos/ -name "*rpm" |xargs -i rpm -qpR {} |grep "rpmlib(ShortCircuited)"

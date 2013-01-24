@@ -1,0 +1,18 @@
+<%inherit file="base.html" />
+
+<%block name="after_overview">
+
+
+<h1 id="deps">Dependencies</h1>
+<table class="right">
+%for pkg, ver in status.deps:
+    <tr>
+        <th>${pkg}</th>
+        <td>${ver}</td>
+    </tr>
+%endfor
+</table>
+
+
+</%block>
+

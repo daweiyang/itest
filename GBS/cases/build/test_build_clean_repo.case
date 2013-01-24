@@ -1,0 +1,35 @@
+__Issue__: 548
+
+__Tag__:
+
+__Summary__: --clean-repos will remove local repo RPM, SRPM and log dir before build
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> . tools/assert
+
+> sudo rm ${GBS_LOCAL_REPOS} -rf
+
+> tools/create_proj specs/fake.spec
+
+> tools/create_proj specs/sw-tools.spec
+
+> gbs -c conf_fixtures/tizendev.cfg build fake -A i586
+
+> AssertRPMsIWith fake
+
+> gbs -c conf_fixtures/tizendev.cfg build sw-tools -A i586
+
+> AssertRPMsIWith fake
+
+> gbs -c conf_fixtures/tizendev.cfg build sw-tools -A i586 --clean-repos 2>&1 | tee log
+
+> grep "cleaning up local repo:" log
+
+> AssertRPMsIWithout fake

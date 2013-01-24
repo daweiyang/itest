@@ -1,0 +1,36 @@
+__Issue__: 82
+
+__Tag__:
+
+__Summary__: test submit in subdir
+
+__Precondition__
+
+1. Tested Pkgs: test-submit
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> if [ -d 'fake-submit' ]; then rm -rf fake-submit; fi
+
+> if [ -d 'test-submit' ]; then rm -rf test-submit; fi
+
+> tools/create_proj specs/fake.spec -C fake-submit
+
+> git clone fake-submit test-submit
+
+> pushd test-submit/packaging
+
+> gbs submit -m 'test submit in subdir'
+
+> git tag |tee log
+
+> test -n "`grep "submit/trunk/" log`"
+
+> pushd
+
+> git --git-dir=fake-submit/.git/ tag |tee log
+
+> test -n "`grep "submit/trunk/" log`" && echo GBS_TEST_PASSED
+

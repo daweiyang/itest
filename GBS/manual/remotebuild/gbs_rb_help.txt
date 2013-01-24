@@ -1,0 +1,19 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: Test gbs remotebuild help
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+
+> gbs remotebuild -h
+> gbs rb -h
+> gbs rb --help
+> gbs remotebuild --help

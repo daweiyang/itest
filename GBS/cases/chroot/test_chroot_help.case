@@ -1,0 +1,31 @@
+__Issue__: 70
+
+__Tag__:
+
+__Summary__: gbs chroot help info check
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+
+> gbs -c conf_fixtures/tizen.cfg chroot -h
+
+chroot (ch): chroot to build root
+
+Usage:
+    gbs chroot [options] <build root dir>
+
+    Note: The default location of build root located at:
+    ~/GBS-ROOT/local/scratch.{arch}.*, which will be different
+    if -B option specified while running gbs build
+
+        Options:
+            -h, --help  show this help message and exit
+                -r, --root  chroot as root instead of abuild by default
+
+> gbs -c conf_fixtures/tizen.cfg chroot --help

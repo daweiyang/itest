@@ -1,0 +1,18 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: Test gbs build help
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+
+> gbs -c ../conf_fixtures/tizendev.cfg build -h
+
+> test -z "`grep "mount:.*scratch" log`"

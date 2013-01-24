@@ -1,0 +1,29 @@
+__Issue__:
+
+__Tag__:gbs_im_not_git
+
+__Summary__:run gbs import in none git repo dir
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizen.cfg
+
+__Steps__
+
+> tools/create_proj specs/sw-tools.spec
+
+> cd sw-tools
+
+> gbs export
+
+> cp `find packaging/ -name '*.tar.bz2'` ../
+
+> cd ..
+
+> rm -rf sw-tools
+
+> (! gbs -c conf_fixtures/tizen.cfg import sw-tools-1.0-1.tar.bz2 2>&1 | tee log)
+
+> grep 'is not a git repository' log

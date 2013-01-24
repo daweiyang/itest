@@ -1,0 +1,26 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: update changelog file
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake/
+
+> gbs -c ../conf_fixtures/changelog_save.cfg changelog
+
+> (! gbs -c ../conf_fixtures/changelog_save.cfg changelog 2>&1 | tee log)
+
+> HEAD_COMMIT=$(git rev-parse HEAD)
+
+> grep "error.*Nothing found between $HEAD_COMMIT and HEAD" log
+

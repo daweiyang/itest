@@ -1,0 +1,23 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: negative test: not git repo
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+
+> rm -rf tmp_changelog
+
+> mkdir tmp_changelog
+
+> (! gbs -c conf_fixtures/changelog_cat.cfg changelog tmp_changelog/ 2>&1 |tee log)
+
+> grep "error.*No Git repository" log
+

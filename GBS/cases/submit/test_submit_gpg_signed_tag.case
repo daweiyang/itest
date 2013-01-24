@@ -1,0 +1,19 @@
+__Issue__: 82
+
+__Tag__:
+
+__Summary__: submit -s option failed handling
+
+__Precondition__
+
+1. Tested Pkgs: test-submit
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/json-c.spec
+
+> (! gbs sr -m 'test -m 1' -s json-c/ 2>&1 | tee log)
+
+> grep "error:.*failed to create tag" log

@@ -1,0 +1,19 @@
+__Issue__:
+
+__Tag__:gbs_im_help02
+
+__Summary__:gbs import help
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+
+> gbs import --help|tee log
+
+> grep -i 'Usage' log
+

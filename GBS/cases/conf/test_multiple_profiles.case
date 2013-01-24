@@ -1,0 +1,29 @@
+__Issue__: 91
+
+__Tag__:
+
+__Summary__: test multiple profiles in conf to select
+
+__Precondition__
+
+1. Tested Pkgs:fake
+2. Tested Repo:
+3. Tested Conf: multiple_repos.cfg
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cp conf_fixtures/multiple_profile.cfg .
+
+> sed -i "2 c profile = profile.tizen_ivi" multiple_profile.cfg
+
+> gbs -c multiple_profile.cfg lb -A i586 fake/ --overwrite --clean 2>&1| tee log
+
+> grep "repository.*download.tizen.org/snapshots/trunk/ivi/latest" log
+
+> sed -i "2 c profile = profile.tizendev" multiple_profile.cfg
+
+> gbs -c multiple_profile.cfg lb -A i586 fake/ --overwrite --clean 2>&1| tee log
+
+> grep "repository.*download.tizendev.org/snapshots/trunk/common/latest" log

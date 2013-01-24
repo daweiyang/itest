@@ -1,0 +1,46 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:--clean work well in condition of --keep-packs
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tizendev.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ~/GBS-ROOT/local/scratch.i586.0 ];then sudo rm ~/GBS-ROOT/local/scratch.i586.0 -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build
+
+> ../tools/create_proj ../specs/fake.spec
+
+> ../tools/create_proj ../specs/sw-tools.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build sw-tools -A i586
+
+> test -n "`find ~/GBS-ROOT/local/repos -name "*sw-tools*.rpm"`"
+
+#libpython is only depanded by sw-tools but not fake
+> sudo chroot ~/GBS-ROOT/local/scratch.i586.0/ rpm -qa|grep 'libpython'
+
+> gbs -c ../conf_fixtures/tizendev.cfg build fake -A i586 --keep-packs
+
+> test -n "`find ~/GBS-ROOT/local/repos -name "*fake*.rpm"`"
+
+#with keep-packs libpython won't be deleted
+> sudo chroot ~/GBS-ROOT/local/scratch.i586.0/ rpm -qa|grep 'libpython'
+
+#--clean force to clear buildroot even there is --keep-packs
+> gbs -c ../conf_fixtures/tizendev.cfg build fake -A i586 --keep-packs --clean --overwrite
+
+> (! sudo chroot ~/GBS-ROOT/local/scratch.i586.0/ rpm -qa|grep 'libpython')

@@ -1,0 +1,96 @@
+__Summary__: export patch with define patch macro
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__QA__
+
+Q: What will be the source package name?
+A:
+
+Q: What is the upstream version?
+A:
+
+__Steps__
+
+> tools/create_proj specs/sw-tools.spec
+
+> cd sw-tools
+
+> sed -i 's/^Version:.*$/Version:0.1/' packaging/sw-tools.spec
+
+> git commit -a -m 'update to 0.1'
+
+> gbs export --source-rpm
+
+> cp `find packaging/ -name '*.src.rpm'` ../
+
+> rm -rf `find packaging/ -type d -name 'sw-tools*'`
+
+> sed -i 's/^Version:.*$/Version:0.2/' packaging/sw-tools.spec
+
+> sed -i 's/^Source0:.*$/Source0: %{name}-%{version}.tar.gz/' packaging/sw-tools.spec
+
+> git commit -a -m 'upgrade to gbs 0.2 and tar.gz fmt'
+
+> gbs export
+
+> cp `find packaging/ -name '*.tar.gz'` ../
+
+> cd ../
+
+> rm sw-tools -rf
+
+> gbs import sw-tools-0.1-1.src.rpm
+
+> cd sw-tools
+
+> git branch | grep pristine-tar
+
+> git branch | grep upstream
+
+> git tag | grep upstream/0.1
+
+> gbs import ../sw-tools-0.2.tar.gz --merge
+
+#generate a project with upstream
+> git tag | grep upstream/0.2
+
+> perl -i -pne 's/%setup -q -n %{name}-%{version}/%setup -q -n %{name}-%{version}\necho i am a mark/' packaging/sw-tools.spec
+
+> git add packaging/sw-tools.spec
+
+> echo "generate a patch" >hello
+
+> git add hello
+
+#modify
+> git commit -m "hello and mark spec"
+
+> gbs export 2>&1 | tee ../log
+
+> grep -i "info: Didn't find any old '%patch' macros, adding new patches after the last '%setup' macro" ../log
+
+#"%patch0 -p1" generate between "%setup -q -n" and "echo i am a mark" if there is no patch macro
+> sed -n '/%setup -q -n/,/echo i am a mark/p' packaging/sw-tools-0.2-1/sw-tools.spec | grep '%patch0 -p1'
+
+> rm -rf packaging/sw-tools-0.2-1
+
+#add patch macro after "i am a mark" so that "patch0 -p1" won't go after "%setup" directly but after macro
+> perl -i -pne 's/echo i am a mark/echo i am a mark\n\#Gbp-Patch-Macros/' packaging/sw-tools.spec
+
+> git add packaging/sw-tools.spec
+
+> git commit -m 'add patch macro'
+
+> gbs export 2>&1 | tee ../log2
+
+> grep -i "info: Adding '%patch' macros after the start marker" ../log2
+
+> (! sed -n '/%setup -q -n/,/echo i am a mark/p' packaging/sw-tools-0.2-1/sw-tools.spec | grep '%patch0 -p1')
+
+#"%patch0" generate after "#Gbp-Patch-Macros" not after "%setup"
+> sed -n '/echo i am a mark/,/%files/p' packaging/sw-tools-0.2-1/sw-tools.spec | grep '%patch0 -p1'

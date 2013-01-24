@@ -1,0 +1,79 @@
+__Issue__:594
+
+__Summary__: setting a upstream git tag as the parent
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__QA__
+
+Q: What will be the source package name?
+A:
+
+Q: What is the upstream version?
+A:
+
+__Steps__
+
+> ./tools/create_proj ./specs/fake.spec
+
+> cd fake
+
+> gbs export --source-rpm
+
+> cp ` find packaging/ -name '*.src.rpm'` ../
+
+> rm -rf  `find packaging/ -type d -name 'fake*'`
+
+> sed -i 's/^Version:.*$/Version:2.0/' packaging/fake.spec
+
+> git commit -a -m 'upgrade to 2.0'
+
+> gbs export
+
+> cp `find packaging/ -name '*.tbz2'` ../
+
+> rm -rf  `find packaging/ -type d -name 'fake*'`
+
+> sed -i 's/^Version:.*$/Version:3.0/' packaging/fake.spec
+
+> git commit -a -m 'upgrade to 3.0'
+
+> gbs export
+
+> cp `find packaging/ -name '*.tbz2'` ../
+
+> cd ../
+
+> rm fake -rf
+
+> gbs import fake-1.0-1.src.rpm
+
+> cd fake
+
+> gbs import ../fake-2.0.tbz2
+
+#copy for compare
+> cp ../fake ../fake2 -r
+
+#parent is upstream/2.0
+> gbs import ../fake-3.0.tbz2 --upstream-vcs-tag=upstream/2.0
+
+> git checkout upstream
+
+#upstream/1.0->upstream/2.0->upstream/3.0 fast forward
+> test -z $(git log -1|grep -i 'Merge:')
+
+> cd ../fake2
+
+#parent is upstream/1.0
+> gbs import ../fake-3.0.tbz2 --upstream-vcs-tag=upstream/1.0
+
+> git checkout upstream
+
+#upstream/1.0->upstream/2.0 \__ same parent
+#upstream/1.0->upstream/3.0 /   merge
+> git log -1|grep -i 'Merge:'

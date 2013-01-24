@@ -1,0 +1,34 @@
+__Issue__: 552
+
+__Tag__:
+
+__Summary__: ExclusiveArch in spec is prior to command line arch
+
+__Precondition__
+
+1. Tested Pkgs: acpid
+2. Tested Repo: https://download.tizendev.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/acpid.spec
+
+> (! gbs -c ../conf_fixtures/tizendev.cfg build -A armv7l 2>&1 | tee log)
+
+#check build log not compatible
+> test -n "`grep "build arch not compatible" log`"
+
+> test -n "`grep "error.*no available packages to build" log`"
+
+#check source package not changed
+> cd acpid && test -n "`git status | grep "working directory clean"`"
+

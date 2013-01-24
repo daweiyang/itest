@@ -1,0 +1,35 @@
+__Issue__: 76
+
+__Tag__:
+
+__Summary__: import the same src rpm twice
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/json-c.spec
+
+> cd json-c
+
+> sed -i 's/lzma$/gz/' packaging/json-c.spec
+
+> git commit -a -m 'update to tar.gz'
+
+> gbs export --source-rpm
+
+> cp `find packaging/ -name '*.src.rpm'` ../
+
+> cd ..
+
+> rm -rf json-c
+
+> gbs -c conf_fixtures/base.cfg im json-c-0.9-1.src.rpm
+
+> gbs -c conf_fixtures/base.cfg im json-c-0.9-1.src.rpm >log 2>&1
+
+> grep "already imported" log

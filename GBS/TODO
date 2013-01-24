@@ -1,0 +1,10 @@
+1. Running build and remotebuild cases rely on network connection, proxy setting. Some cases sometimes will be failed because of SSL 500 error, rpm verifying error, connection timeout. Maybe retry mechanism can fix theses issues.
+
+2. Running conf test cases will delete user's gbs conf, which doesn't matter for test virtual machine. The user may complain if runnig itest in his or her machine. 
+   Also, running itest will clean gbs buildroot directory.
+
+3. Test cases are orderly executed now. Running at random may result in many build cases failed due to changing repository issue.
+
+4. Completing all test cases will take about 2 hours if you don't use GBS-ROOT cache. Localrepo can speed up testing.
+
+5. Test report need to refine.

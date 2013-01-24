@@ -1,0 +1,43 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:test overwirte with ccache option
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build
+
+> ../tools/create_proj ../specs/xorg-x11-filesystem.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --overwrite --ccache -A ia32 2>&1 | tee log
+
+> test -z "`grep "mount:.*scratch" log`"
+
+> test -z "`grep "skip.*xorg-x11-filesystem" log`"
+
+> test -n "`find ~/GBS-ROOT/local/repos -name "*xorg-x11-filesystem*.rpm"`"
+
+> time1=`find ~/GBS-ROOT/local/repos/ -name "*.rpm" |grep /RPMS/xorg-x11-filesystem |xargs -i stat -c %y {}`
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --overwrite -A ia32 2>&1 | tee log
+
+> time2=`find ~/GBS-ROOT/local/repos/ -name "*.rpm" |grep /RPMS/xorg-x11-filesystem | xargs -i stat -c %y {}`
+
+#check source package unchanged
+> cd xorg-x11-filesystem && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> test "$time1" != "$time2"
+

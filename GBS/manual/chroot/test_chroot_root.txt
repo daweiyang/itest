@@ -1,0 +1,29 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: test gbs chroot --root
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> gbs -c conf_fixtures/tizen.cfg chroot ~/GBS-ROOT/local/scratch.i586.0 -r
+
+> id
+
+(tizen-build-env)@localhost /]# id
+uid=0(root) gid=0(root) groups=0(root),29(audio),6505(pulse-access),6506(pulse-rt)
+
+> whoami
+
+(tizen-build-env)@localhost /]# whoami
+root
+
+> exit
+
+> test -eq 0 && echo GBS_TEST_PASSED

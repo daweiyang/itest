@@ -1,0 +1,49 @@
+__Issue__:
+
+__Tag__: gbs_im_tarxz_fmt
+
+__Summary__:excute gbs import from a tar.xz format tar ball
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizen.cfg
+
+__QA__
+
+Q: What will be the source package name?
+A:
+
+Q: What is the upstream version?
+A:
+
+__Steps__
+
+> tools/create_proj specs/sw-tools.spec
+
+> cd sw-tools
+
+> sed -i 's/tar.bz2$/tar.xz/' packaging/sw-tools.spec
+
+> git commit -a -m 'update tar.xz'
+
+> gbs export
+
+> cp `find packaging/ -name '*.tar.xz'` ../
+
+> cd ..
+
+> rm -rf sw-tools
+
+> mkdir sw-tools
+
+> cd sw-tools
+
+> git init
+
+> gbs -c ../conf_fixtures/tizen.cfg import ../sw-tools-0.1.tar.xz --merge
+
+> git log|grep -i 'Imported Upstream version 0.1'
+
+> git tag|grep 'upstream/0.1'

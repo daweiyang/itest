@@ -1,0 +1,28 @@
+__Issue__: 110, 85
+
+__Tag__:
+
+__Summary__: running gbs changelog on no branch
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> pushd fake
+
+> git branch
+
+> git checkout --detach
+
+> git branch
+
+> gbs -c ../conf_fixtures/changelog_save.cfg changelog
+
+> ls packaging/*.changes
+

@@ -1,0 +1,18 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: test multiple repositories in repos option in profile sction
+
+__Precondition__
+
+1. Tested Pkgs:fake
+2. Tested Repo:
+3. Tested Conf: multiple_repos.cfg
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> gbs -c conf_fixtures/multiple_repos.cfg lb -A i586 fake/ --overwrite --clean
+

@@ -1,0 +1,41 @@
+__Issue__: 59
+
+__Tag__:
+
+__Summary__: test -B, --buildlog and --status option
+
+__Precondition__
+
+1. Tested Pkgs: fake
+2. Tested Repo:
+3. Tested Conf: noraml_rb.cfg
+
+__Steps__
+
+> source tools/gbs_vars
+
+> if [ -d ./remotebuild ];then rm remotebuild -rf; fi
+
+> mkdir remotebuild
+
+> cd remotebuild
+
+> ../tools/create_proj ../specs/fake.spec
+
+> gbs -c ../conf_fixtures/normal_rb.cfg remotebuild -B Tizen:Main -T $GBS_RB_TARGET fake
+
+> sleep 10
+
+> gbs -c ../conf_fixtures/normal_rb.cfg remotebuild --status fake -T $GBS_RB_TARGET 2>&1| tee log
+
+> repo=$(sed -n '2p' log | awk '{print $1}')
+
+> arch=$(sed -n '2p' log | awk '{print $2}')
+
+> gbs -c ../conf_fixtures/normal_rb.cfg remotebuild --buildlog -R $repo -A $arch -T $GBS_RB_TARGET fake
+
+> (! gbs -c ../conf_fixtures/normal_rb.cfg remotebuild -T $GBS_RB_TARGET --buildlog fake -R nonstd -A $arch 2>&1 | tee log)
+
+> grep -E -i "error.*no valid repo.*" log
+
+> osc -c ../conf_fixtures/oscrc rdelete --recursive $GBS_RB_TARGET -m "delete target prj"

@@ -1,0 +1,38 @@
+__Issue__:157
+
+__Tag__:
+
+__Summary__:clean buildroot if repo data updated
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/fake.spec
+
+> time1=`ls -l --full-time ~/GBS-ROOT/local | grep scratch | awk '{ print $7 }'`
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --clean -A armv7l 2>&1
+
+> test -z "`grep "mount:.*scratch" log`"
+
+> time2=`ls -l --full-time ~/GBS-ROOT/local | grep scratch | awk '{ print $7 }'`
+
+> cd fake && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> test -n "`find ~/GBS-ROOT/local/repos -name "*fake*.rpm"`"
+
+> test "$time1" != "$time2"
+

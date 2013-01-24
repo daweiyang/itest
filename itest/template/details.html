@@ -1,0 +1,41 @@
+<h1>Details</h1>
+<ul>
+%for comp, cases in status.comp2cases.iteritems():
+    %if status.components[comp]['total'] > 0:
+    <li>
+        <h2 id="${comp}">${comp}</h2>
+        <table>
+            <tr>
+                <th>Case</th>
+                <th>Result</th>
+                <th>Issue#</th>
+            </tr>
+            %for case in cases:
+            <tr id="case${case['id']}">
+                <td><a href="${basename(case['file'])}">
+                    ${case['name']}</a></td>
+                <td><a href="${basename(case['log'])}"
+                %if case['is_pass']:
+                    class="pass">Pass
+                %else:
+                    class="failed">Failed
+                %endif
+                </td>
+                <td>
+                %if case['issue']:
+                    %for i in case['issue']:
+                    <a href="${issue_link(i)}">#${i}</a>
+                    %endfor
+                %else:
+                    &nbsp;
+                %endif
+                </td>
+            </tr>
+            %endfor
+        </table>
+
+        <a href="#overview">back to top</a>
+    </li>
+    %endif
+%endfor
+</ul>

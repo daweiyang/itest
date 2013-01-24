@@ -1,0 +1,58 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: Upgrade gbs from download.tizen.org to latest version
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+1. Create new VMs, or using exist VMs, but need to be clean up with following
+steps:
+ 1). Remove old gbs and dependencies:
+  Ubuntu:
+  $ sudo dpkg -r gbs depanneur osc build  qemu-arm-static git-buildpackage-common git-buildpackage-rpm libcrypt-ssleay-perl
+  openSUSE:
+  $ sudo rpm -e gbs depanneur osc build qemu-arm-static git-buildpackage-common git-buildpackage-rpm perl-Crypt-SSLeay build-mkdrpms --nodeps
+  Fedora:
+  $ sudo rpm -e gbs depanneur osc build qemu-arm-static git-buildpackage-common git-buildpackage-rpm perl-Crypt-SSLeay
+ 2). Set up correct repo
+ 3). if /proc/sys/fs/binfmt_misc/arm exist, run `echo "-1" >/proc/sys/fs/binfmt_misc/arm` as root, then check if /proc/sys/fs/binfmt_misc/arm is gone.
+
+2. following this document to install gbs
+ https://source.stg.tizen.org/documentation/reference/git-build-system/installation
+ gbs and its dependency should be installed automaticy, if any error, please report ASAP.
+
+3. Use new repo to replace download.tizen.org/tools, then execute, the following command to do upgrade.
+
+ Ubuntu: 
+  $ apt-get update
+  $ apt-get install gbs
+ openSUSE
+  $ zypper refresh
+  $ zypper update gbs
+ Fedora
+  $ yum makecache
+  $ yum udpate gbs
+
+*Notes*: Please note which packages have been updated duing gbs upgrade, this is very important.
+Upgrade report format:
+/--------------------------------------------------------------------\
+|Package name| versionbefore upgrade | version After upgrade| updated|
+|            |                       |                      |  yes/No|
+---------------------------------------------------------------------
+|            |                       |                      |        |
+----------------------------------------------------------------------
+.
+.
+.
+----------------------------------------------------------------------
+|            |                       |                      |        |
+\--------------------------------------------------------------------/
+
+Please Attach detail upgrade log.

@@ -1,0 +1,25 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: permission issue to target prj
+
+__Precondition__
+
+1. Tested Pkgs: fake
+2. Tested Repo:
+3. Tested Conf: normal_rb.cfg
+
+__Steps__
+
+> if [ -d ./remotebuild ];then rm remotebuild -rf; fi
+
+> mkdir remotebuild
+
+> cd remotebuild
+
+> ../tools/create_proj ../specs/fake.spec
+
+> (! gbs -c ../conf_fixtures/normal_rb.cfg remotebuild -T home:Admin fake 2>&1 | tee log)
+
+> grep -E -i "error.*Can't set meta for home:Admin.*" log

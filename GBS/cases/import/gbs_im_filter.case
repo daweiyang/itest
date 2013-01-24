@@ -1,0 +1,43 @@
+__Issue__:594
+
+__Summary__:files to filter out during import
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake
+
+> echo 'filter1' > f1
+
+> echo 'filter2' > f2
+
+> git add f1
+
+> git add f2
+
+> git commit -m 'add filter files'
+
+> gbs export --source-rpm
+
+> cp ` find packaging/ -name '*.src.rpm'` ../
+
+> cd ..
+
+> rm -rf fake
+
+> gbs import fake-1.0-1.src.rpm
+
+> [ -f fake/f1 ] && [ -f fake/f2 ]
+
+> rm -rf fake
+
+> gbs import fake-1.0-1.src.rpm --filter=f1 --filter=f2
+
+> [ ! -f fake/f1 ] && [ ! -f fake/f2 ]

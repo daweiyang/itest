@@ -1,0 +1,20 @@
+__Issue__:468, 82
+
+__Tag__:
+
+__Summary__: run submit with empty message
+
+__Precondition__
+
+1. Tested Pkgs: test-submit
+2. Tested Repo:
+3. Tested Conf: normal_rb.cfg
+
+__Steps__
+
+> tools/create_proj specs/fake.spec -C test-submit
+
+> (! gbs submit -m "" test-submit/ 2>&1 | tee log)
+
+> grep "error:.*tag message is required" log
+

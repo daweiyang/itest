@@ -1,0 +1,167 @@
+install
+=======
+install itest
+-------------
+sudo python setup.py install
+
+install vim plugin (optional)
+-----------------------------
+install gbs vim plugin to write test cases easily
+tar -xf ./gbs-vimplugin.tar.gz -C ~/.vim
+
+usage
+=====
+
+write new case using vim plugin
+-------------------------------
+  $ vim xxx.gbs
+   :shell
+  $ gbs build -h
+  $ ... && echo GBS_TEST_PASSED
+   Ctrl+D
+   :wq #save cases
+  $ cat xxx.gbs
+
+support bash tab completion for gbs
+-----------------------------------
+python setup.py install gbs.bash to /etc/bash_completion.d/
+reboot your computer to make it effective
+or copy gbs.bash to home directory, add ". gbs.bash" into .bashrc
+
+  $ gbs --
+  --debug     --help      --verbose   --version
+
+prepare for test environment
+----------------------------
+export GBS_SUDO_PASSWORD #default 123456
+export http_proxy, https_proxy, no_proxy
+install pexpect
+
+running gbs test cases
+----------------------
+1. run all test cases
+  $ runtest
+  $ python -m itest.main # another way
+
+2. print detail message when running test cases
+  $ runtest -v
+
+3. print log when runing test cases, useful for debuging
+  $ runtest -vv data/auto/changelog/test_changelog_since.gbs
+
+4. run test suites
+  $ runtest chroot export
+
+5. run single test case and test suites
+  $ runtest data/auto/build/test_build_commit_ia32.gbs import submit
+
+6. check test results
+  $ runtest chroot submit changelog auto/build/test_build_help.gbs
+........................
+
+Ran 24 tests in 0h 00 min 10s
+
+OK
+
+Details
+---------------------------------
+Component      Passed   Failed
+build          1        0
+remotebuild    0        0
+changelog      7        0
+chroot         2        0
+import         0        0
+export         0        0
+submit         14       0
+conf           0        0
+
+6. send html and logs report to server
+    the test results are located at ~/testspace/
+    $ rsync -av ~/testspace/logs test@testvm:~/${dist}/${arch}/${branch}
+    supported dist is Ubuntu11.10 Ubuntu12.04 Ubtun12.10 Fedora16
+        Fedora17 OpenSUSE12.1 OpenSUSE12.2
+    supported arch is x86 and x86_64
+    supported branch is devel and release
+
+    Example:
+    $ rsync -av /home/test/testspace/logs test@testvm:~/Fedora17/x86/release
+    sending incremental file list
+    logs/
+    .......
+    sent 47731 bytes  received 1559 bytes  8961.82 bytes/sec
+    total size is 44206  speedup is 0.90
+
+7. look at the html report
+    home page: http://testvm.bj.intel.com/gbs/
+    Fedora17 x86 release test report url:
+     http://testvm.bj.intel.com/gbs/Fedora17/x86/release/logs/report.html
+
+Deploy Web Page
+===============
+
+Steps on server
+---------------
+1. install itest(reference above)
+2. install python-bottle: sudo apt-get install python-bottle
+3. create reportdb directory according to REPORT_DBPATH in web/app.py
+4. add testing virtual machine's publick key into ~/.ssh/authorized_keys
+5. change to itest project path, and run python web/app.py, here you can run "nohup python web/app.py &" to make it run background forever
+6. after starting server, you can testing http://hostname:8080/report/list to check if server is available
+
+Steps on slaves(test VMs)
+-------------------------
+1. install itest
+2. there are three items should be written in MIC/setting.py or GBS/settings.py:
+
+ - TARGET_NAME = 'mic'
+ - SUDO_PASSWD = 'xxxx'
+ - UPLOAD_URL = 'user@hostname:/home/itest/reportdb/%(date)s/%(dist)s_%(arch)s'
+ 
+ above is an exapme of mic, you can set TARGET_NAME to your testing project like gbs, UPLOAD_URL is the web server's reportdb path, %(date)s/%(dist)s_%(arch)
+ is some variables to distinguish logs by date, you can keep them or hard code like UPLOAD_URL = 'user@hostname:/home/itest/reportdb/2012-09-12/'
+ 
+3. generate public key for web server:
+    sh-keygen
+    #it will create id_rsa.pub in ~/.ssh/, and copy the content to web server's ~/.ssh/authorized_keys   
+4. run cases with --auto-sync:
+     runtest -vv --auto-sync MIC/cases
+5. after finished running, you can go to  http://hostname:8080/report/list to check the report
+
+notes: if you have a few virtual machines for testing, you should assure the date is consistent, you can use: date -s '2013-01-10 12:40'
+
+
+Syntax of \_\_steps__
+-----------------------
+
+\_\_steps__ is the core section of a case.  It consist of command lines and
+comments. A lines starting with '>' is called command line. Others are all
+treated as comments. Comments are only for reading, they will be ignored in
+running.
+
+Each command line runs one by one in the same order as they occur in case. If
+any command exit with nonzero, the whole case will exit immediately and is
+treated as failed. The only condition that a case pass is when the last command
+exit with code 0. 
+
+For example:
+
+    > echo 1
+    > false | echo 2
+    > echo 3
+
+"echo 3" never run, it fail in the second line.
+
+When you want to assert a command will fail, add "!" before it, and enclose with
+parenthesis(subshell syntax).
+
+    > echo 1
+    > (! false | echo 2)
+    > echo 3
+
+This case pass, because the designer assert that the second will fail via "!".
+Parenthesis are required, which makes the whole line a subshell and the subshell
+exit with 0. When parenthesis are missing, this case will fail in the second
+line(same as the above example).
+
+NOTE: Itest use "bash -xe" and "set -o pipefall" to implement this, please refer
+bash manual for more detail.

@@ -1,0 +1,40 @@
+__Issue__:551
+
+__Tag__:
+
+__Summary__:check if upstream and pristine-tar are avaiable in remote git repo
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj -f specs/fake.spec
+
+> gbs export fake --source-rpm --outdir=.
+
+> cd fake-1.0-1/
+
+> gbs import fake-1.0-1.src.rpm
+
+> git --git-dir=fake/.git branch
+
+> git clone fake clone-fake
+
+> git --git-dir=clone-fake/.git remote show origin
+
+> gbs export clone-fake >log 2>&1
+
+> grep "pristine-tar and upstream branches exist in remote branches" log
+
+> git clone fake clone2-fake
+
+> git --git-dir=clone2-fake/.git branch upstream
+
+> gbs export clone2-fake >log 2>&1
+
+> grep "pristine-tar branch exist in remote branches" log
+

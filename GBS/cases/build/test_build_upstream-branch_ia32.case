@@ -1,0 +1,34 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:test upstream-branch feature
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+###I don't know how to test this feature exactly###
+###so beblow is demo, anyone who knows pls reivise this###
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build
+
+> ../tools/create_proj ../specs/fake.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --upstream-branch=UPSTREAM_BRANCH -A ia32 2>&1 | tee log
+
+> cd fake && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> test -z "`grep "mount:.*scratch" log`"
+
+> test -n "`find ~/GBS-ROOT/local/repos -name "*fake*.rpm"`"

@@ -1,0 +1,33 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:test noinit feature
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> sudo rm ~/GBS-ROOT/local/repos -rf
+
+> rm build -rf
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/sw-tools.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --clean -A armv7l 2>&1 | tee log
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --noinit -A armv7l 2>&1 | tee log
+
+> test -z "`grep "generate repositories" log`"
+
+> cd sw-tools && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> test -n "`find ~/GBS-ROOT/local/repos -name "*sw-tools*.rpm"`"

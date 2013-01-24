@@ -1,0 +1,48 @@
+__Issue__:574
+
+__Tag__:
+
+__Summary__:gbs import in different user at the same machine
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj -f specs/fake.spec
+
+> gbs export fake --source-rpm --outdir=.
+
+> mkdir tmp
+
+> cd tmp
+
+> gbs import ../fake-1.0-1/fake-1.0-1.src.rpm
+
+> cd ../
+
+> if ! id itester; then sudo useradd itester -p123456 -m; fi
+
+> TMP_PKG=$(mktemp -d /var/tmp/itesterXXXX)
+
+> tools/create_proj specs/fake.spec -f -C $TMP_PKG
+
+> sudo chown -R itester:itester $TMP_PKG
+
+> sudo -u itester gbs export $TMP_PKG --source-rpm
+
+> TMP_IMPORT=$(sudo -u itester mktemp -d /var/tmp/itester-importXXXX)
+
+> sudo chmod a+x $TMP_IMPORT
+
+> cd $TMP_IMPORT
+
+> sudo -u itester gbs import $TMP_PKG/packaging/fake-1.0-1/fake-1.0-1.src.rpm --author-name=foo --author-email=foo@bar.com
+
+> cd ../
+
+> sudo -u itester rm -rf $TMP_PKG $TMP_IMPORT
+

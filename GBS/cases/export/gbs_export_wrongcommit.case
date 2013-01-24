@@ -1,0 +1,19 @@
+__Summary__: gbs ex option -c test
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizen.cfg
+
+__Steps__
+
+> ./tools/create_proj ./specs/fake.spec
+
+> cd fake
+
+> (! gbs -c ../conf_fixtures/tizen.cfg ex --commit 12345678 2>&1 | tee ../log)
+
+> grep -i "revision .* not found" ../log
+
+> [ ! -f ./packaging/fake-1.0-1/fake-1.0.tbz2 ]

@@ -1,0 +1,53 @@
+__Issue__: 332
+
+__Tag__:
+
+__Summary__: export tarball and patch from a project with upstream
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> sudo rm /var/tmp/tmp_export /home/gbstmptester -rf
+
+> sudo mkdir /var/tmp/tmp_export
+# copy data needed to tmp dir
+> sudo cp -r ./tools/create_proj ./specs/fake.spec ./specs/json-c.spec /var/tmp/tmp_export
+
+> sudo chmod -R 777 /var/tmp/tmp_export
+# add a user to test
+> if id gbstmptester;then sudo userdel -r gbstmptester; fi
+
+> sudo mkdir /home/gbstmptester
+
+> sudo useradd -d /home/gbstmptester gbstmptester
+
+> sudo chown gbstmptester.gbstmptester /home/gbstmptester
+
+> sudo passwd gbstmptester
+
+> sudo git config --system user.email "gbstmptester@intel.com"
+
+> sudo git config --system user.name gbstmptester
+
+> cd /var/tmp/tmp_export
+
+> ./create_proj fake.spec
+
+> gbs ex fake
+
+> sudo -u gbstmptester ./create_proj json-c.spec
+
+> sudo -u gbstmptester gbs ex json-c
+
+> sudo rm -fr /home/gbstmptester
+
+> sudo userdel -r gbstmptester
+
+> sudo [ -f /var/tmp/tmp_export/json-c/packaging/json-c-0.9-1/json-c-0.9.tar.lzma ]
+
+> [ -f /var/tmp/tmp_export/fake/packaging/fake-1.0-1/*.tbz2 ]

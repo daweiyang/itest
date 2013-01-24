@@ -1,0 +1,21 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: set tmpdir value in general section
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> rm -rf ~/test-tmpdir
+
+> gbs -c conf_fixtures/set_tmpdir_in_general_section.cfg lb -A i586 fake --overwrite
+
+> [ -d ~/test-tmpdir ]

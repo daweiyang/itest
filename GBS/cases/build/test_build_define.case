@@ -1,0 +1,28 @@
+__Issue__:#540
+
+__Tag__:
+
+__Summary__: use --define option to define macro for rpmbuild
+
+__Precondition__
+
+1. Tested Pkgs: fake
+2. Tested Repo: tizendev
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build
+
+> ../tools/create_proj ../specs/fake.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build -A ia32 --define "DEBUG 1" --define "PRODUCT 0" 2>&1 | tee log
+
+> grep -E "exec rpmbuild .*--define .*DEBUG 1[^-]*--define .*PRODUCT 0" log
+

@@ -1,0 +1,132 @@
+#!/bin/bash
+
+info() {
+    echo "$@"
+}
+
+error() {
+    echo "$@" >&2
+    exit 1
+}
+
+usage() {
+    echo "Usage: `basename $0` [options] <spec> [files ...]"
+    echo "Create dummy GIT project form spec for testing"
+    echo
+    echo "  spec"
+    echo "      path to spec file"
+    echo "  files"
+    echo "      files that will be copied to project/packaging dir"
+    echo
+    echo "  -h, --help"
+    echo "  -f, --force"
+    echo "      force to create project, delete existed project before creating"
+    echo "  -C DIR, --directory=DIR"
+    echo "      create project in DIR, if not given it will guess the project"
+    echo "  -t, --tizen"
+    echo "      create a standard tizen package including upstream and pristine-tar branch"
+    echo "      name from the spec file name and create the project as a"
+    echo "      subdir of cwd"
+}
+
+guess_project_dir() {
+    if [ -n "$output_dir" ]; then
+        proj_dir=$output_dir
+    else
+        proj_dir=$(basename $spec .spec)
+    fi
+}
+
+check_proj() {
+    if [ -e $proj_dir ]; then
+        if [ "$force" == 1 ]; then
+            info "overwriting project $proj_dir"
+            rm -rf $proj_dir
+        else
+            error "project $proj_dir exists"
+        fi
+    fi
+}
+
+make_proj() {
+    info "creating GIT project at $proj_dir using $@"
+
+    pack_dir=$proj_dir/packaging
+
+    mkdir -p $pack_dir
+    for fname in "$@"; do
+        cp $fname $pack_dir
+    done
+
+    pushd $proj_dir
+    echo 'this dummy project was create for gbs testing' > README
+
+    git init
+    git add .
+    git commit -m "Initial commit"
+
+    if [ "$tizen_pkg" == 1 ]; then
+        gbs export
+        local specfile=$(find packaging/ -mindepth 2 -name "*.spec")
+        pushd
+        gbs import "$proj_dir/$specfile"
+        pushd
+        rm -rf $(dirname $specfile)
+    fi
+}
+
+### Main
+
+TEMP=$(getopt -o hfC:t --long help,force,directory:,tizen -n "$0" -- "$@")
+if [ $? -ne 0 ]; then
+    usage
+    exit 1
+fi
+
+eval set -- "$TEMP"
+while true; do
+    case "$1" in
+        -h|--help)
+            usage
+            exit 0
+            ;;
+        -f|--force)
+            force=1
+            shift
+            ;;
+         -C|--directory)
+            shift;
+            output_dir=$1
+            shift
+            ;;
+         -t|--tizen)
+            tizen_pkg=1
+            shift
+            ;;
+         --)
+            shift
+            break
+            ;;
+         *)
+            echo "Internal error!"
+            exit 1
+            ;;
+        esac
+done
+
+if [ ${#@} -lt 1 ]; then
+    error "spec file is required"
+fi
+
+for fname in "$@"; do
+    if [ ! -f "$fname" ]; then
+        error "No such file: $fname"
+    fi
+done
+
+spec=$1
+shift
+
+guess_project_dir "$@"
+check_proj $proj
+make_proj $spec "$@"

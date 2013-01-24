@@ -1,0 +1,37 @@
+__Issue__: 69
+
+__Tag__: test packaging-dir feature with multi-specs
+
+__Summary__:
+
+__Precondition__
+
+1. Tested Pkgs: fake
+2. Tested Repo: https://download.tizendev.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> sudo rm ~/GBS-ROOT/local/repos -rf
+
+> rm build -rf
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/fake.spec ../specs/fake-dev.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --packaging-dir=packaging -A ia32 2>&1 | tee log
+
+#check build log key word init_buildsystem...--spec xxx.spec
+> test -n "`grep "init_buildsystem.*fake.spec" log`"
+
+> test -n "`grep "init_buildsystem.*fake-dev.spec" log`"
+
+#check source package whether changed or not
+> cd fake && test -n "`git status | grep "working directory clean"`"
+
+#check rpm generated whether or not
+> test -n "`find ~/GBS-ROOT/local/repos -name "*fake*.rpm"`"
+

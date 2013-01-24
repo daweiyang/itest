@@ -1,0 +1,29 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:test remotebuild --profile
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> source tools/gbs_vars
+
+> if [ -d ./remotebuild ];then rm remotebuild -rf; fi
+
+> mkdir remotebuild
+
+> cd remotebuild
+
+> ../tools/create_proj ../specs/fake.spec
+
+> gbs -c ../conf_fixtures/multiple_profile.cfg remotebuild -T $GBS_RB_TARGET -P tz_common fake 2>&1|tee log
+
+> grep "https://build.tizen.org" log
+
+> osc -c ../conf_fixtures/oscrc rdelete --recursive $GBS_RB_TARGET -m "delete target prj"

@@ -1,0 +1,22 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: negative test: changelog --since error_commit_id
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake
+
+> (! gbs -c ../conf_fixtures/changelog_cat.cfg changelog --since error_id 2>&1 |tee log)
+
+> grep "Invalid commit" log
+

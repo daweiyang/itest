@@ -1,0 +1,27 @@
+__Issue__: 5
+
+__Tag__:
+
+__Summary__: editor not exist but works well
+
+__Precondition__
+
+1. Tested Pkgs:fake
+2. Tested Repo:
+3. Tested Conf:changelog_save.cfg
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake
+
+#The EDITOR maybe nano...before,but uninstall later, so define xxx-editor
+> export EDITOR=XXX-editor
+
+> gbs ch 2>&1| tee log
+
+> grep "XXX-editor.*not found" log
+
+> (! ls packaging/*.changes)
+

@@ -1,0 +1,57 @@
+__Issue__:594
+
+__Summary__: gbs import with no patch import
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> ./tools/create_proj ./specs/fake.spec
+
+> cd fake
+
+> gbs export --source-rpm
+
+> cp ` find packaging/ -name '*.src.rpm'` ../
+
+> cd ../
+
+> rm fake -rf
+
+> gbs import fake-1.0-1.src.rpm
+
+> cd fake
+
+> echo "generate a patch" >hello
+
+> git add hello
+
+> git commit -m "hello"
+
+> gbs export -o ../
+
+> cd ../fake-1.0-1
+
+> gbs import fake.spec
+
+#patch has been apllied
+> [ -f fake/hello ]
+
+> [ ! -f fake/packaging/0001-hello.patch ]
+
+> test -z $(grep '0001-hello.patch' fake/packaging/fake.spec)
+
+> rm -rf fake
+
+> gbs import fake.spec --no-patch-import
+
+#patch don't be applied
+> [ ! -f fake/hello ]
+
+> [ -f fake/packaging/0001-hello.patch ]
+
+> grep '0001-hello.patch' fake/packaging/fake.spec

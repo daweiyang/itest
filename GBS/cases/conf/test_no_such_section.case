@@ -1,0 +1,20 @@
+__Issue__: 56
+
+__Tag__:
+
+__Summary__: test no general section
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> (! gbs -c conf_fixtures/no_general_section.cfg lb -A i586 fake/ 2>&1 |tee log)
+
+> grep 'error.*config file error:File contains no section headers' log
+

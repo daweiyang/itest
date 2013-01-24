@@ -1,0 +1,47 @@
+__Issue__: 60
+
+__Tag__:
+
+__Summary__: test buildroot priority(env var < cmd line)
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> sudo rm ~/buildroot/local/repos -rf
+
+> rm build -rf
+
+> mkdir build
+
+> cd build
+
+> ../tools/create_proj ../specs/tizen-release.spec
+
+> ../tools/create_proj ../specs/fake.spec
+
+> ../tools/create_proj ../specs/xorg-x11-filesystem.spec
+
+> export TIZEN_BUILD_ROOT=~/buildroot2
+
+> gbs -c ../conf_fixtures/tizendev.cfg build --buildroot=~/buildroot -A ia32 2>&1 | tee log
+
+> unset TIZEN_BUILD_ROOT
+
+> test -z "`grep "mount:.*scratch" log`"
+
+> cd fake && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> cd xorg-x11-filesystem && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> cd tizen-release && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> test -n "`find ~/buildroot/local/repos -name "*fake*.rpm"`"
+
+> test -n "`find ~/buildroot/local/repos -name "*tizen-release*.rpm"`"
+
+> test -n "`find ~/buildroot/local/repos -name "*xorg-x11-filesystem*.rpm"`"

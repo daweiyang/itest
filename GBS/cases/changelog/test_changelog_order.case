@@ -1,0 +1,39 @@
+__Issue__: 55
+
+__Tag__:
+
+__Summary__: changelog ordered by %at(author date, UNIX timestamp) now
+
+__Precondition__
+
+1. Tested Pkgs:fake
+2. Tested Repo:
+3. Tested Conf:changelog_save.cfg
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> echo "- 2" >> fix-order-change
+
+> echo "- 1" >> fix-order-change
+
+> echo "- Initial commit" >> fix-order-change
+
+> cd fake
+
+> touch 1 && git add 1 && git commit -m "1"
+
+> touch 2 && git add 2 && git commit -m "2"
+
+> gbs -c ../conf_fixtures/changelog_save.cfg changelog
+
+> ls packaging/*.changes
+
+> cd ..
+
+> sed "1d" fake/packaging/fake.changes > fake-change
+
+> diff -B fix-order-change fake-change
+
+

@@ -1,0 +1,44 @@
+__Issue__: 82
+
+__Tag__:
+
+__Summary__: test submit -r option
+
+__Precondition__
+
+1. Tested Pkgs: test-submit
+2. Tested Repo:
+3. Tested Conf: noraml_rb.cfg
+
+__Steps__
+
+> if [ -d 'fake-submit' ]; then rm -rf fake-submit; fi
+
+> if [ -d 'test-submit' ]; then rm -rf test-submit; fi
+
+> if [ -d 'fake-remote' ]; then rm -rf fake-remote; fi
+
+> tools/create_proj specs/fake.spec -C fake-submit
+
+> git clone fake-submit test-submit
+
+> git clone fake-submit fake-remote
+
+> pushd test-submit
+
+> git remote add fake-origin ../fake-remote
+
+> git remote -v |tee log
+
+> gbs submit --remote fake-origin -m "test remote" |tee log
+
+> TAG=`awk -v FS=: '/submit\/trunk/ {print $3}' log`
+
+> test -n $TAG
+
+> pushd
+
+> git --git-dir=fake-remote/.git/ tag |tee log
+
+> test -n `grep "$TAG" log` && echo "GBS_TEST_PASSED"
+

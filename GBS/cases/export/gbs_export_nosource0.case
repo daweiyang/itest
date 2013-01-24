@@ -1,0 +1,32 @@
+__Issue__: 13
+
+__Summary__: export with specfile no source tag
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizen.cfg
+
+__Steps__
+
+> ./tools/create_proj ./specs/fake.spec
+
+> cd fake
+
+> gbs -c ../conf_fixtures/tizen.cfg ex
+
+#fake.spec name:fake version:1.0 release 1
+#top dir name should be {name}-{version}-{release}
+> ls packaging/fake-1.0-1
+
+> rm packaging/fake-1.0-1 -rf
+
+> sed -i "s|Source0|Source1|" packaging/fake.spec
+
+> git add packaging/fake.spec
+
+> git commit -m "change spec source0 to source1"
+
+> gbs -c ../conf_fixtures/tizen.cfg ex
+

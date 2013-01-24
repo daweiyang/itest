@@ -1,0 +1,27 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__:test gbs debug feature
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> . tools/assert
+
+> sudo rm ${GBS_LOCAL_REPOS} -rf
+
+> tools/create_proj specs/mkdevnodes.spec
+
+> gbs -c conf_fixtures/tizendev.cfg build --debug -A ia32 2>&1 | tee log
+
+> test -z "`grep "mount:.*scratch" log`"
+
+> AssertRPMsIWith mkdevnodes
+
+> AssertCleanWith mkdevnodes

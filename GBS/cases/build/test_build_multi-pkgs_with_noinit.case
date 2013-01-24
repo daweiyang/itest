@@ -1,0 +1,41 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: --noinit should only support building one package
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> if [ -d ~/GBS-ROOT/local/repos ];then sudo rm ~/GBS-ROOT/local/repos -rf; fi
+
+> if [ -d ./build ];then rm build -rf; fi
+
+> mkdir build
+
+> cd build/
+
+> ../tools/create_proj ../specs/fake.spec
+
+> ../tools/create_proj -C power ../specs/capi-system-power.spec
+
+> ../tools/create_proj ../specs/xorg-x11-filesystem.spec
+
+> gbs -c ../conf_fixtures/tizendev.cfg build fake -A i586
+
+> (! gbs -c ../conf_fixtures/tizendev.cfg build --noinit -A i586 2>&1 | tee log)
+
+> cd fake && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> cd power && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> cd xorg-x11-filesystem && test -n "`git status | grep "working directory clean"`" && cd ..
+
+> grep "\--noinit build only support building one package" log
+
+> grep "rpmbuild fails" log

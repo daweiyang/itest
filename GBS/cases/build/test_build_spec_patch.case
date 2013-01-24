@@ -1,0 +1,39 @@
+__Issue__: 73
+
+__Tag__:
+
+__Summary__: specfile patch tag is patch not patch0, patch1...
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo: https://download.tz.otcshare.org/snapshots/trunk/common/latest
+3. Tested Conf: conf_fixtures/tizendev.cfg
+
+__Steps__
+
+> . ./tools/assert
+
+> sudo rm $GBS_LOCAL_REPOS -rf
+
+> ./tools/create_proj ./specs/mingetty.spec
+
+> cd mingetty
+
+> echo "This is a patch" >README2
+
+> (! diff -u README README2| tee packaging/mingetty-1.00-opt.patch)
+
+> rm README2
+
+> git add packaging/mingetty-1.00-opt.patch
+
+> git commit -m "add the needed patch"
+
+> cd ..
+
+> gbs -c ./conf_fixtures/tizendev.cfg build -A ia32 2>&1| tee log
+
+> AssertCleanWith mingetty
+
+> AssertRPMsIWith mingetty

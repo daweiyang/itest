@@ -1,0 +1,30 @@
+__Issue__:635
+
+__Summary__:gbs export can work if there is packaging dir in any commit
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake
+
+> git rm -r packaging
+
+> git commit -m 'remove packaging'
+
+> (! gbs export 2>&1 | tee ../log)
+
+> grep -i "can't find any spec file under packaging dir" ../log
+
+> [ ! -f ./packaging/fake-1.0-1/fake-1.0.tbz2 ]
+
+#if there is packaging in any commit, gbs export work well
+> gbs export --commit HEAD~1
+
+> [ -f ./packaging/fake-1.0-1/fake-1.0.tbz2 ]

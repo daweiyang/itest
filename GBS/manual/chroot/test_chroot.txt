@@ -1,0 +1,43 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: test gbs chroot as default normal user
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> ./tools/create_proj ./specs/fake.spec
+> gbs -c conf_fixtures/tizen.cfg lb fake
+
+info: finished building fake
+info: updating local repo
+info: generated RPM packages can be found from local repo:
+    /home/test/GBS-ROOT/local/repos/tizen
+info: build roots located in:
+    /home/test/GBS-ROOT/local/scratch.{arch}.*
+info: Done
+
+> test -d /home/test/GBS-ROOT/local/scratch.i586.0
+
+> gbs chroot /home/test/GBS-ROOT/local/scratch.i586.0
+
+> id
+
+(tizen-build-env)@localhost /]$ id
+uid=1000(system) gid=1000(system) groups=1000(system)
+
+> whoami
+
+(tizen-build-env)@localhost /]$ whoami
+system
+
+> exit
+
+> test -eq 0 && echo GBS_TEST_PASSED
+

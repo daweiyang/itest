@@ -1,0 +1,40 @@
+__Issue__:493
+
+__Tag__:gbs_import_wrong_name
+
+__Summary__:support name contain alphanumerics or minus or _
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:conf_fixtures/tizen.cfg
+
+__Steps__
+
+
+> if [ -d "tmp_import" ];then rm tmp_import -rf;fi
+
+> mkdir ./tmp_import
+
+> touch test.tar.gz
+
+> cd tmp_import
+
+> git init
+
+> gbs -c ../../conf_fixtures/tizen.cfg import ../test.tar.gz
+
+> tes_t
+
+warning:
+Not a valid package name: ''.
+Package names must be at least two characters long, start with an
+    alphanumeric and can only contain alphanumerics or minus signs (-)
+What will be the source package name? []
+
+Here should support _ in package name!
+
+> cd ..
+
+> if [ -d "tmp_import" ];then rm tmp_import -rf;fi

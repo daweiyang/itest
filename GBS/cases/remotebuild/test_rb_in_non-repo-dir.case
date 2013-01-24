@@ -1,0 +1,25 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: remotebuild in non-repo dir
+
+__Precondition__
+
+1. Tested Pkgs: tmp
+2. Tested Repo:
+3. Tested Conf: normal_rb.cfg
+
+__Steps__
+
+> if [ -d ./remotebuild ];then rm remotebuild -rf; fi
+
+> mkdir remotebuild
+
+> cd remotebuild
+
+> mkdir not-repo
+
+> (! gbs -c ../conf_fixtures/normal_rb.cfg remotebuild not-repo 2>&1 | tee log)
+
+> grep -E -i "error.*No Git repository at" log

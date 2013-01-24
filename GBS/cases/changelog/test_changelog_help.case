@@ -1,0 +1,19 @@
+__Issue__:
+
+__Tag__:
+
+__Summary__: gbs changelog help info check
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+
+> gbs -c conf_fixtures/changelog_cat.cfg changelog -h
+
+> gbs -c conf_fixtures/changelog_cat.cfg changelog --help
+

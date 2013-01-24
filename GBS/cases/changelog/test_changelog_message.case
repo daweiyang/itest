@@ -1,0 +1,22 @@
+__Issue__: 88
+
+__Tag__:
+
+__Summary__:test message feature
+
+__Precondition__
+
+1. Tested Pkgs:
+2. Tested Repo:
+3. Tested Conf:
+
+__Steps__
+
+> tools/create_proj specs/fake.spec
+
+> cd fake
+
+> gbs -c ../conf_fixtures/changelog_cat.cfg ch -m ChangelogMessage |tee log
+
+> grep "ChangelogMessage" log
+
