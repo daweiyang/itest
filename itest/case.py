@@ -1,12 +1,8 @@
-#!/usr/bin/env python
 # vim: set sw=4 ts=4 ai et:
 import os
-import re
 import sys
-import itertools
 
 from itest.conf import settings
-from itest.utils import now
 from itest import msger
 
 import pexpect
@@ -50,62 +46,6 @@ def sudo(cmd):
     return pcall(cmd, expecting=expecting, timeout=60, output=sys.stdout)
 
 
-class CaseManager(object):
-
-    def __init__(self):
-        self.cases_path = os.path.join(settings.ENV_PATH,
-                                       settings.CASES_DIR)
-        self.components = [ name
-            for name in os.listdir(self.cases_path)
-            if os.path.isdir(os.path.join(self.cases_path, name)) ]
-
-    def _find_recursively(self, top):
-        cases = [
-            map(lambda name: os.path.join(current, name),
-            filter(lambda name: name.endswith('.case'), nondirs))
-            for current, _dirs, nondirs in os.walk(top) ]
-        return itertools.chain(*cases)
-
-    def find_one(self, sel):
-        # case file
-        if os.path.isfile(sel):
-            return [ os.path.abspath(sel) ]
-
-        # directory which contains cases
-        if os.path.isdir(sel):
-            return self._find_recursively(os.path.abspath(sel))
-
-        #suite name defined in ENV settings
-        if sel in settings.SUITES:
-            return settings.SUITES[sel]
-
-        #component name which is the first-level child name of ENV cases path
-        if sel in self.components:
-            path = os.path.join(self.cases_path, sel)
-            return self._find_recursively(path)
-
-        return []
-
-    def find(self, selector):
-        cases = []
-
-        if not selector:
-            cases = self._find_recursively(self.cases_path)
-        elif hasattr(selector, '__iter__'):
-            for sel in selector:
-                cases.extend(self.find_one(sel))
-        else:
-            cases = self.find_one(selector)
-
-        cases = list(set(cases))
-        cases.sort()
-
-        #FIXME: should shuffle cases before testing
-        # but now GBS build cases can't be shuffled
-        #random.shuffle(cases)
-        return cases
-
-
 class Tee(object):
 
     '''data write to original will write to another as well'''
@@ -126,156 +66,34 @@ class Tee(object):
         self.original.close()
 
 
-class CaseParser(object):
-
-    def __init__(self, lines):
-        self._lineno = 0
-        self._current_section_name = None
-        self._concat_to_last_line = False
-        self.sections = {}
-
-        self._parse(lines)
-
-    def _open_a_new_section(self, line):
-        def split_header(line):
-            pos = line.find(':')
-            if pos != -1:
-                name, remain = line[:pos], line[pos+1:].strip()
-            else:
-                name = line
-                remain = ''
-            name = name.strip('_ \t\r\n').lower()
-
-            if not name:
-                raise SyntaxError('%d:Invalid section header:%s' % \
-                    (self._lineno, line))
-            return name, remain
-
-        name, remain = split_header(line)
-        if name in self.sections:
-            raise SyntaxError('%d:Duplicate section:%s' % (self._lineno, line))
-        self._current_section_name = name
-        self.sections[name] = []
-        self._append_section_content(remain)
-
-    def _append_section_content(self, line):
-        name = self._current_section_name
-        if not name:
-            raise SyntaxError('%d:Content outside section:%s' % \
-                (self._lineno, line))
-        line = line.rstrip('\r\n')
-        if line.endswith('\\'):
-            self._concat_to_last_line = True
-            line = line[:-1]
-            self.sections[name].append(line)
-        elif self._concat_to_last_line:
-            self._concat_to_last_line = False
-            self.sections[name][-1] += line
-        else:
-            self.sections[name].append(line)
-
-    def _parse_text(self, lines):
-        for line in lines:
-            self._lineno += 1
-            if line.startswith('#'):
-                continue
-            elif line.startswith('__'): # section header
-                self._open_a_new_section(line)
-            else:
-                self._append_section_content(line)
-
-    def _parse(self, lines):
-        self._parse_text(lines)
-        self.summary = self._parse_summary()
-        self.steps = self._parse_steps()
-        self.qa = self._parse_qa()
-        self.issue = self._parse_issue()
-
-    def _parse_summary(self):
-        if not 'summary' in self.sections:
-            raise SyntaxError('Summary section is required')
-        return '\n'.join([line for line in self.sections['summary'] if line])
-
-    def _parse_steps(self):
-        if not 'steps' in self.sections:
-            raise SyntaxError('Steps section is required')
-
-        return [ line[1:].lstrip()
-                for line in self.sections['steps']
-                if line.startswith('>') ]
-
-    def _parse_qa(self):
-        if not 'qa' in self.sections:
-            return []
-
-        qa = []
-        state = 0
-        question = None
-        answer = None
-
-        for line in self.sections['qa']:
-            line = line.rstrip(os.linesep)
-            if not line:
-                continue
-
-            if state == 0 and line.startswith('Q:'):
-                question = line[len('Q:'):].lstrip()
-                state = 1
-            elif state == 1 and line.startswith('A:'):
-                # add os.linesep here to simulate user input enter
-                answer = line[len('A:'):].lstrip() + os.linesep
-                state = 2
-            elif state == 2 and line.startswith('Q:'):
-                qa.append((question, answer))
-                question = line[len('Q:'):].lstrip()
-                state = 1
-            else:
-                raise SyntaxError('Invalid format of QA:%s' % line)
-
-        if state == 2:
-            qa.append((question, answer))
-
-        return qa
-
-    def _parse_issue(self):
-        if not 'issue' in self.sections:
-            return None
-
-        txt = '\n'.join(self.sections['issue']).strip()
-        if not txt:
-            return []
-
-        nums = []
-        issues = txt.replace(',', ' ').split()
-        for issue in issues:
-            m = re.match(r'(#|(feature|bug|issue)(-)?)?(\d+)', issue, re.I)
-            if m:
-                nums.append(m.group(4))
-
-        if not nums:
-            raise SyntaxError('Unrecognized issue number:%s' % txt)
-        return nums
-
-
-
 class TestCase(object):
-    '''Class of single test case.'''
+    '''Single test case'''
 
-    parser_cls = CaseParser
-    meta_path_name = '.itest'
+    meta = '.itest'
+    count = 1
+    was_successful = False
 
-    def __init__(self, suite, fname):
-        self.suite = suite
-        self.casename = os.path.basename(fname)
-        self.log_path = os.path.join(suite.logdir, self.casename + '.log')
-        self.component = self.guess_component(fname)
-        #change self.is_pass to self.exit_value, specify it with
-        #these possible values, None : not excuted, 0 : passed,
-        #other integers : failed
-        self.exit_value = None
-        self.parse_case(fname)
+    def __init__(self, fname, summary, steps, qa=(), issue=None, teardown=()):
+        self.filename = fname
+        self.summary = summary
+        self.steps = steps
+        self.qa = qa
+        self.issue = issue
+        self.teardown = teardown
+        self.component = self.guess_component(self.filename)
         #TODO: need a more reasonable and meaningful id rather than this
-        self.id = hash(self.casename)
+        self.id = hash(self)
+        self.start_time = None
+        self.logname = None
+        self.rundir = None
+        self.script = None
+        self.teardown_script = None
+
+    def __hash__(self):
+        return hash(self.filename)
+
+    def __eq__(self, that):
+        return hash(self) == hash(that)
 
     def guess_component(self, filename):
         # assert that filename is absolute path
@@ -286,35 +104,62 @@ class TestCase(object):
         # >1 means [0] is an dir name
         return relative[0] if len(relative) > 1 else 'unknown'
 
-    def parse_case(self, fname):
-        with open(fname) as fp:
-            parser = self.parser_cls(fp)
+    def _prepare(self, space):
+        self.rundir = space.new_test_dir()
+        os.chdir(self.rundir)
+        self.logname = space.new_log_name(self)
+        os.mkdir(self.meta)
+        self.script = self._generate_run()
+        if self.teardown:
+            self.teardown_script = self._generate_script('teardown', self.teardown)
 
-        self.summary = parser.summary
-        self.steps = parser.steps
-        self.expecting = [ ('[p|P]assword', settings.SUDO_PASSWD) ] + parser.qa
-        self.issue = parser.issue
+    def _set_up(self):
+        pass
 
-    def logcat(self):
-        """display the log of test case"""
-        if os.path.exists(self.log_path):
-            os.system('/bin/cat %s' % self.log_path)
+    def _tear_down(self, verbose):
+        if self.teardown:
+            return self._run_script(self.teardown_script, verbose)
 
-    def run(self, verbose):
-        script = self._generate_script(self.steps)
-        self.start_time = now()
+    def _run_cmd(self, verbose):
+        return self._run_script(self.script,
+                                verbose,
+                                '-xe',
+                                self.qa)
 
-        with open(self.log_path, 'w') as log:
+    def _run_script(self, path, verbose, bash_opts='-x', more_expecting=()):
+        expecting = [('[p|P]assword', settings.SUDO_PASSWD)] + list(more_expecting)
+        with open(self.logname, 'a') as log:
             if verbose and verbose > 1:
                 log = Tee(log)
-            # all steps exit 0 means testing is passed
-            self.exit_value = pcall('/bin/bash', ['-xe', script],
-                                    expecting=self.expecting,
-                                    timeout=6*60*60,
-                                    output=log)
+            return pcall('/bin/bash',
+                         [bash_opts, path],
+                         expecting=expecting,
+                         timeout=settings.RUN_CASE_TIMEOUT,
+                         output=log)
 
-        self.delete_color_code_in_log_file(self.log_path)
-        return self.exit_value
+    def run(self, result, space, verbose):
+        result.test_start(self)
+
+        try:
+            self._prepare(space)
+            self._set_up()
+
+            try:
+                exit_status = self._run_cmd(verbose)
+            finally: # make sure to call tearDown if setUp success
+                self._tear_down(verbose)
+                self.delete_color_code_in_log_file(self.logname)
+
+            if exit_status == 0:
+                result.add_success(self)
+            else:
+                result.add_failure(self)
+        except KeyboardInterrupt:
+            raise
+        except:
+            result.add_exception(self, sys.exc_info())
+        finally:
+            result.test_stop(self)
 
     def delete_color_code_in_log_file(self, fname):
         os.system("sed -i 's/\x1b\[[0-9]*m//g' %s" % fname)
@@ -327,8 +172,8 @@ class TestCase(object):
             rcopt = ''
 
         target = settings.TARGET_NAME
-        fake_target = os.path.join(self.meta_path_name, target)
-        logpath = os.path.dirname(self.log_path)
+        fake_target = os.path.join(self.meta, target)
+        logpath = os.path.dirname(self.logname)
 
         with open(fake_target, 'w') as f:
             print >> f, '''#!/bin/bash
@@ -340,21 +185,21 @@ exit $status
 
         pre.extend(['export ITEST_ORIG_TARGET=$(which %s)' % target,
                     'chmod +x %s' % fake_target,
-                    'export PATH=$(pwd)/%s:$PATH' % self.meta_path_name,
+                    'export PATH=$(pwd)/%s:$PATH' % self.meta,
                     ])
 
-    def _generate_script(self, steps):
-        name = os.path.join(self.meta_path_name, 'run')
+    def _generate_run(self):
         pre = ['set +x',
-            'set -o pipefail',
             ]
-
         if settings.ENABLE_COVERAGE:
             self._run_with_coverage(pre)
+        pre.extend(['set -o pipefail',
+                    'set -x'])
+        return self._generate_script('run', pre + self.steps)
 
-        pre.extend(['set -x'])
-
-        content = os.linesep.join(pre + steps)
-        with open(name, 'w') as f:
+    def _generate_script(self, name, cmds):
+        path = os.path.join(self.meta, name)
+        content = os.linesep.join(cmds)
+        with open(path, 'w') as f:
             f.write(content)
-        return name
+        return path

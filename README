@@ -130,10 +130,10 @@ Steps on slaves(test VMs)
 notes: if you have a few virtual machines for testing, you should assure the date is consistent, you can use: date -s '2013-01-10 12:40'
 
 
-Syntax of \_\_steps__
+Syntax of \_\_steps\_\_
 -----------------------
 
-\_\_steps__ is the core section of a case.  It consist of command lines and
+\_\_steps\_\_ is the core section of a case.  It consist of command lines and
 comments. A lines starting with '>' is called command line. Others are all
 treated as comments. Comments are only for reading, they will be ignored in
 running.
@@ -165,3 +165,11 @@ line(same as the above example).
 
 NOTE: Itest use "bash -xe" and "set -o pipefall" to implement this, please refer
 bash manual for more detail.
+
+Syntax of \_\_teardown\_\_
+--------------------------
+
+You can write any shell command in this section. It runs after \_\_steps\_\_ finished
+whatever \_\_steps\_\_ failed or successed. Result of this section doesn't affect
+result of \_\_steps\_\_.  It can be used to cleanup intermediate files created by
+\_\_steps\_\_.

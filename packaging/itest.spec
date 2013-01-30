@@ -1,14 +1,14 @@
 %{!?python_sitelib: %define python_sitelib %(%{__python} -c "from distutils.sysconfig import get_python_lib; print get_python_lib()")}
 Name:       itest
 Summary:    gbs system test automatic script and test cases
-Version:    1.0
+Version:    1.1
 Release:    1
 Group:      Development/Tools
 License:    GPLv2
 BuildArch:  noarch
 URL:        http://www.tizen.org
-Source0:    %{name}-%{version}.tar.gz
-Requires:   gbs
+Source0:    %{name}_%{version}.tar.gz
+Requires:   python >= 2.7
 Requires:   pexpect
 BuildRequires:  python-devel
 
@@ -27,8 +27,5 @@ rm -rf $RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root,-)
-/etc/bash_completion.d/gbs.bash
-%dir %{_datadir}/%{name}
 %{python_sitelib}/*
-%{_datadir}/%{name}/*
 %{_bindir}/runtest

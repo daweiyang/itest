@@ -1,20 +1,19 @@
-#!/usr/bin/env python
 # vim: set sw=4 ts=4 ai et:
 import os
 import re
 import time
-import signal
 from argparse import ArgumentParser
 from threading import Thread, Event
 
 from itest import msger
+from itest.env import TestEnv
 from itest.conf import settings, ENVIRONMENT_VARIABLE
-from itest.case import CaseManager
-from itest.suite import TestSuite
+from itest.space import TestSpace
 from itest.utils import get_dist, get_arch
-from itest.runner import ConsoleRunner, StatusFile
-from itest.report import TextReport, HTMLReport
-from itest.error import SIGErr, sighandle
+from itest.loader import TestLoader
+from itest.runner import TextTestRunner, StatusFile
+from itest.report import HTMLReport
+from itest.signals import install_handler
 
 
 def rsync(local_path, remote_path):
@@ -82,15 +81,16 @@ def mkdir_in_remote(url):
 
 
 def run_test(args):
-    mgr = CaseManager()
-    case_fnames = mgr.find(args.cases)
-    if not case_fnames:
+    env = TestEnv(settings)
+
+    loader = TestLoader()
+    suite = loader.load_args(args.cases, env)
+    if suite.count < 1:
         print 'No case found'
         return
 
-    suite = TestSuite(case_fnames)
-    runner = ConsoleRunner(suite, args.verbose)
-    if not runner.prepare():
+    space = TestSpace(settings.WORKSPACE)
+    if not space.setup(suite, env):
         return
 
     to_upload = args.auto_sync or args.url
@@ -101,23 +101,22 @@ def run_test(args):
     if args.auto_sync:
         msger.info('automatically upload report ot %s' % url)
         to_die = Event()
-        thread = start_sync_worker(runner.log_path, url, to_die, args.interval)
+        thread = start_sync_worker(space.logdir, url, to_die, args.interval)
 
     def make_report_and_upload():
         if args.auto_sync:
             to_die.set()
             thread.join()
 
-        make_report(runner.log_path)
+        make_report(space.logdir)
         if to_upload:
-            rsync(runner.log_path, url)
+            rsync(space.logdir, url)
 
+    runner = TextTestRunner(args.verbose)
     try:
-        runner.run()
+        runner.run(suite, space, env)
     except KeyboardInterrupt:
         print '\nAbort!'
-    except SIGErr, err:
-        print '\n', err
     finally:
         make_report_and_upload()
 
@@ -125,9 +124,12 @@ def run_test(args):
 def make_report(log_path):
     make_coverage_report(log_path)
 
-    info = StatusFile(os.path.join(log_path, 'STATUS')).load()
-    for cls in (TextReport, HTMLReport):
-        cls(info).show()
+    name = os.path.join(log_path, 'STATUS')
+    if not os.path.exists(name):
+        return
+
+    info = StatusFile(name).load()
+    HTMLReport(info).generate()
 
 
 def make_coverage_report(log_path):
@@ -151,8 +153,7 @@ def guess_env():
 def main():
     guess_env()
 
-    #define sorts of signal handler
-    signal.signal(signal.SIGTERM, sighandle)
+    install_handler()
 
     parser = ArgumentParser(description='an testing framework for tools')
     parser.add_argument('cases', nargs='*',

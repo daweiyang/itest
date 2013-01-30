@@ -1,168 +1,56 @@
 import os
 import sys
 import json
+import time
 import datetime
 
-from itest import msger
-from itest.utils import get_local_ipv4, now, get_dist, get_arch, query_pkg_info
-from itest.case import sudo
-from itest.conf import settings
+from itest.utils import now
+from itest.result import HTMLTestResult
+from itest.signals import register_result
 
 
-class ConsoleRunner(object):
+class TextTestRunner(object):
 
-    def __init__(self, suite, verbose):
-        self.suite = suite
+    result_class = HTMLTestResult
+
+    def __init__(self, verbose):
         self.verbose = verbose
-        self.log_path = suite.logdir
-        self.stfp = StatusFile(os.path.join(self.log_path, 'STATUS'))
-        self.lock_fname = os.path.join(self.suite.workspace, 'LOCK')
-        self.locked = False
 
-    def __del__(self):
-        if self.locked:
-            self.release_lock()
+    def _make_result(self):
+        return self.result_class(self.verbose)
 
-    def collect_env(self):
-        env = [
-            ('Dist', get_dist()),
-            ('Arch', get_arch()),
-            ('IP', get_local_ipv4()),
-            ]
-        if settings.TARGET_NAME:
-            if settings.TARGET_VERSION:
-                ver = settings.TARGET_VERSION
-            else:
-                ver = query_pkg_info(settings.TARGET_NAME)
-            env.append(('Target',
-                        '%s %s' % (settings.TARGET_NAME, ver)))
-        return env
+    def run(self, test, space, env):
+        print 'plan to run %d test%s' % (test.count, 's' if test.count > 1 else '')
 
-    def run_one(self, case):
-        path = self.suite.prepare_env_for_one_case()
-        os.chdir(path)
+        result = self._make_result()
+        register_result(result)
 
-        msger.verbose(case.casename)
-        case.run(self.verbose)
-
-        if self.verbose:
-            long_ = '(%s) %s' % (case.component,
-                                 case.summary)
-            log = msger.passed if case.exit_value == 0 else msger.failed
-            log(long_)
-        else:
-            short = '.' if case.exit_value == 0 else 'F'
-            sys.stdout.write(short)
-        sys.stdout.flush()
-
-    def _run(self):
-        '''Run all the cases specified'''
-        for case in self.suite.cases:
-            try:
-                self.run_one(case)
-            except KeyboardInterrupt:
-                choice = raw_input('''
-Do you want abort or continue next case?
-0-continue
-1-abort
-Please input 0 or 1:[0]''')
-                if choice == '1':
-                    raise
-            finally:
-                self.log_case(case)
-
-    def log_start(self):
-        env = self.collect_env()
-        if settings.DEPENDENCIES:
-            deps = [ (pkg, query_pkg_info(pkg))
-                    for pkg in settings.DEPENDENCIES ]
-        else:
-            deps = []
-        info = {
-            'type': 'start',
-            'start_time': now(),
-            'workspace': self.suite.workspace,
-            'log_path': self.log_path,
-            'total_cases': len(self.suite.cases),
-            'env': env,
-            'deps': deps,
-        }
-        self.stfp.log(info)
-
-    def log_done(self, error):
-        info = {
-            'type': 'done',
-            'error': error,
-            'end_time': now(),
-        }
-        self.stfp.log(info)
-
-    def log_case(self, case):
-        #TODO: deal with the situation that run case failed and
-        # these attributes are not all set correctly
-        info = {
-            'type': 'case',
-            'start_time': case.start_time,
-            'end_time': now(),
-            'name': case.casename,
-            'file': os.path.join(self.log_path, case.casename),
-            'log': case.log_path,
-            'component': case.component,
-            'exit_code': case.exit_value,
-            'issue': case.issue,
-            'id': case.id,
-            }
-        self.stfp.log(info)
-
-    def prepare(self):
-        if not self.acquire_lock():
-            msger.error("another instance is working on this workspace(%s) "
-                        "since the lock file(%s) exist. please run ps to "
-                        "check." % (self.suite.workspace, self.lock_fname))
-            return False
-
-        self.suite.setup_workspace()
-        self.log_start()
-        return True
-
-    def run(self):
-        msger.info('testing start')
-        err = ''
+        start_time = time.time()
+        result.runner_start(test, space, env)
         try:
-            return self._run()
-        except (Exception, KeyboardInterrupt) as err:
-            err = '%s:%s' % (err.__class__.__name__, str(err))
+            test.run(result, space, self.verbose)
+        except KeyboardInterrupt:
+            result.stop(KeyboardInterrupt.__name__)
+        except:
+            result.runner_exception(sys.exc_info())
             raise
         finally:
-            self.log_done(err)
+            result.runner_stop()
 
-    def status_info(self):
-        return self.stfp.load()
+        stop_time = time.time()
+        cost = stop_time - start_time
 
-    def acquire_lock(self):
-        if os.path.exists(self.lock_fname):
-            return False
+        result.print_summary()
+        run = len(result.success) + len(result.failure)
 
-        workspace = self.suite.workspace
-        if os.path.exists(workspace):
-            msger.info('removing old workspace %s' % workspace)
-            if sudo('rm -rf %s' % workspace) != 0:
-                msger.error("can't clean old workspace, please fix manually")
+        print
+        print 'Ran %d test%s in %.3fs' % (run,
+            's' if run > 1 else '', cost)
+        if result.was_successful:
+            print 'OK'
+        else:
+            print '%d FAILED' % len(result.failure)
 
-        os.mkdir(workspace)
-        open(self.lock_fname, 'w').close()
-        self.locked = True
-        return True
-
-    def release_lock(self):
-        try:
-            os.unlink(self.lock_fname)
-        except OSError, err:
-            if err.errno == 2: #No such file or directory
-                msger.warning("lock file(%s) should be there, "
-                              "but it doesn't exist" % self.lock_fname)
-            else:
-                raise
 
 class StatusInfo(object):
 
@@ -182,6 +70,8 @@ class StatusInfo(object):
         self.cases.append(item)
 
     def do_done(self, item):
+        if self.complete:
+            return
         self.complete = True
         self.done = item
 
